@@ -18,3 +18,34 @@ export async function generateTweetsAndHashtags(topic: string) {
     throw error;
   }
 }
+
+export async function generateOptimalTimes(topic: string): Promise<string[]> {
+  try {
+    const prompt = `
+      Suggest 3 optimal posting times (ISO 8601 format) for the topic "${topic}".
+      Consider engagement trends and time zones.
+      Return only the ISO date-times separated by commas.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    // Parse Gemini response into array of ISO strings
+    const times = text
+      .split(/,|\n/)
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .map((t) => new Date(t).toISOString());
+
+    return times;
+  } catch (error) {
+    console.error("Gemini AI error for suggested times:", error);
+    // fallback dummy times
+    const now = new Date();
+    return [
+      new Date(now.getTime() + 1 * 60 * 60 * 1000).toISOString(),
+      new Date(now.getTime() + 4 * 60 * 60 * 1000).toISOString(),
+      new Date(now.getTime() + 7 * 60 * 60 * 1000).toISOString(),
+    ];
+  }
+}

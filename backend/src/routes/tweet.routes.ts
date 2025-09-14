@@ -1,21 +1,21 @@
-import { Router } from "express";
+import express from "express";
 import {
   createNewTweet,
   getUserTweets,
   updateExistingTweet,
-  getTweetsByUserId, // <-- new import
   deleteExistingTweet,
   postTweet,
 } from "../controllers/tweet.controller";
+import { authMiddleware } from "../middlewares/auth.middlewares";
+import { upload } from "../middlewares/upload.middleware";
 
-const router = Router();
+const router = express.Router();
 
-// Routes
-router.post("/", createNewTweet); // Create tweet
-router.get("/", getUserTweets); // Get all tweets for user
-router.get("/user/:userId", getTweetsByUserId); // GET /api/tweets/user/:userId
-router.put("/:id", updateExistingTweet); // Update tweet
-router.delete("/:id", deleteExistingTweet); // Delete tweet
-router.patch("/:id/post", postTweet); // Mark tweet as posted
+// Correct routes
+router.post("/", authMiddleware, upload.array("media"), createNewTweet);
+router.get("/", authMiddleware, getUserTweets);
+router.put("/:id", authMiddleware, updateExistingTweet);
+router.delete("/:id", authMiddleware, deleteExistingTweet);
+router.post("/:id/post", authMiddleware, postTweet);
 
 export default router;
