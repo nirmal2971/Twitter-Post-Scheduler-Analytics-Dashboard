@@ -1,4 +1,4 @@
-Twitter Post Scheduler & Analytics Dashboard
+echo "Twitter Post Scheduler & Analytics Dashboard
 
 A modern MERN stack tool to schedule, manage, and analyze tweets with AI-powered content suggestions, smart scheduling, and an analytics dashboard.
 
@@ -150,5 +150,4 @@ Loading states and error handling across all components.
 
 Mobile-first, responsive UI design.
 
-Real-time analytics updates with dummy or actual engagement metrics.
-
+Real-time analytics updates with dummy or actual engagement metrics." > README.md
