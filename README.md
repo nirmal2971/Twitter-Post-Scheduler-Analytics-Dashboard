@@ -99,7 +99,7 @@ cp .env.example .env
 npm run dev
 
 # Frontend will run at: http://localhost:5173 (Vite default)
-
+```bash
 
 API Documentation
 Authentication
