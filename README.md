@@ -77,29 +77,6 @@ A modern, responsive **Twitter Dashboard** built with the **MERN stack (MongoDB,
 
 - ### Installation & Running the App
 
-```bash
-# 1. Clone the repository
-git clone <repository-url>
-cd <repository-folder>
-
-# 2. Backend setup
-cd servers (like cd frontned and backend)
-npm install
-cp .env.example .env
-# Set MONGO_URI and JWT_SECRET in .env
-npm run dev
-
-# Backend will run at: http://localhost:5000
-
-# 3. Frontend setup
-cd ../client
-npm install
-cp .env.example .env
-# Set VITE_API_BASE to backend URL in .env
-npm run dev
-
-# Frontend will run at: http://localhost:5173 (Vite default)
-```bash
 
 API Documentation
 Authentication
