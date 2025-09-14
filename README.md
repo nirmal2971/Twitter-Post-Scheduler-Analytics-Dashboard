@@ -75,33 +75,35 @@ A modern, responsive **Twitter Dashboard** built with the **MERN stack (MongoDB,
 - MongoDB (local or cloud)  
 - npm or yarn  
 
+
 API Documentation
 Authentication
 
 Handles user registration and login with JWT-based security.
-
-Method	Endpoint	Description
-POST	/auth/register	Register a new user and receive a JWT token
-POST	/auth/login	Login with credentials and receive a JWT token
+| Method | Endpoint         | Description                                    |
+| ------ | ---------------- | ---------------------------------------------- |
+| POST   | `/auth/register` | Register a new user and receive a JWT token    |
+| POST   | `/auth/login`    | Login with credentials and receive a JWT token |
 
 Tweets
 
 Handles CRUD operations for tweets, including scheduling and posting.
-
-Method	Endpoint	Description
-GET	/tweets	Get all tweets for the authenticated user
-POST	/tweets	Create a new tweet (supports media upload)
-PUT	/tweets/:id	Update an existing tweet
-DELETE	/tweets/:id	Delete a scheduled tweet
-POST	/tweets/:id/post	Post a scheduled tweet immediately
+| Method | Endpoint           | Description                                |
+| ------ | ------------------ | ------------------------------------------ |
+| GET    | `/tweets`          | Get all tweets for the authenticated user  |
+| POST   | `/tweets`          | Create a new tweet (supports media upload) |
+| PUT    | `/tweets/:id`      | Update an existing tweet                   |
+| DELETE | `/tweets/:id`      | Delete a scheduled tweet                   |
+| POST   | `/tweets/:id/post` | Post a scheduled tweet immediately         |
 
 AI Suggestions
 
 Provides AI-powered tweet ideas and recommended posting times.
+| Method | Endpoint                        | Description                                      |
+| ------ | ------------------------------- | ------------------------------------------------ |
+| GET    | `/ai/suggestions?topic=<topic>` | Returns AI-generated tweet ideas for a topic     |
+| GET    | `/ai/suggestTime?topic=<topic>` | Returns AI-recommended posting times for a topic |
 
-Method	Endpoint	Description
-GET	/ai/suggestions?topic=<topic>	Returns AI-generated tweet ideas for a given topic
-GET	/ai/suggestTime?topic=<topic>	Returns AI-recommended posting times for a topic
 
 
 Key Points
@@ -115,9 +117,6 @@ Loading states and error handling implemented across all routes.
 
 Real-time updates can be integrated for posting status and analytics.
 
-| Method | Endpoint         | Description                                    |
-| ------ | ---------------- | ---------------------------------------------- |
-| POST   | `/auth/register` | Register a new user and receive a JWT token    |
-| POST   | `/auth/login`    | Login with credentials and receive a JWT token |
+
 
 
