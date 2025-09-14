@@ -115,3 +115,9 @@ Loading states and error handling implemented across all routes.
 
 Real-time updates can be integrated for posting status and analytics.
 
+| Method | Endpoint         | Description                                    |
+| ------ | ---------------- | ---------------------------------------------- |
+| POST   | `/auth/register` | Register a new user and receive a JWT token    |
+| POST   | `/auth/login`    | Login with credentials and receive a JWT token |
+
+
