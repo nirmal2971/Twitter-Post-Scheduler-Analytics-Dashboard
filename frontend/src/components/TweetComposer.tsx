@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import {
-  Box,
+  Paper,
+  Stack,
   Button,
-  Input,
-  Textarea,
-  VStack,
-  HStack,
-  Select,
-  Text,
-} from "@chakra-ui/react";
+  TextField,
+  CircularProgress,
+  MenuItem,
+} from "@mui/material";
 import type { Tweet } from "../store/tweetStore";
 import { useTweetStore } from "../store/tweetStore";
-import api from "../api"; // ✅ use central api with JWT
+import api from "../api";
 
 type TweetComposerProps = {
   content: string;
@@ -22,29 +20,26 @@ const TweetComposer: React.FC<TweetComposerProps> = ({
   content,
   setContent,
 }) => {
-  const [scheduledAt, setScheduledAt] = useState<string | undefined>();
+  const [scheduledAt, setScheduledAt] = useState<string>("");
   const [suggestedTimes, setSuggestedTimes] = useState<string[]>([]);
-  const addTweet = useTweetStore((state) => state.addTweet);
   const [loading, setLoading] = useState(false);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
 
-  // Submit tweet
+  const addTweet = useTweetStore((state) => state.addTweet);
+
   const handleSubmit = async () => {
-    // 1️⃣ Validate content
     if (!content.trim()) {
-      alert("❌ Tweet content cannot be empty.");
+      alert("Tweet content cannot be empty.");
       return;
     }
     if (content.length > 280) {
-      alert("❌ Tweet content cannot exceed 280 characters.");
+      alert("Tweet cannot exceed 280 characters.");
       return;
     }
 
     setLoading(true);
-
     try {
-      // 2️⃣ Prepare FormData for media upload
       const formData = new FormData();
       formData.append("content", content.trim());
       formData.append(
@@ -54,23 +49,16 @@ const TweetComposer: React.FC<TweetComposerProps> = ({
           : new Date().toISOString()
       );
 
-      if (mediaFiles && mediaFiles.length > 0) {
-        mediaFiles.forEach((file) => formData.append("media", file));
-      }
+      mediaFiles.forEach((file) => formData.append("media", file));
 
-      // 3️⃣ Send to backend
       const response = await api.post(
         `${import.meta.env.VITE_API_BASE}/tweets`,
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${"token"}`, // include JWT if needed
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
-      // 4️⃣ Map backend response to local Tweet type
       const newTweet: Tweet = {
         id: response.data._id,
         content: response.data.content,
@@ -79,26 +67,22 @@ const TweetComposer: React.FC<TweetComposerProps> = ({
         media: response.data.media || [],
       };
 
-      // 5️⃣ Update local state
       addTweet(newTweet);
-
-      // 6️⃣ Reset input states
       setContent("");
       setScheduledAt("");
       setMediaFiles([]);
       setSuggestedTimes([]);
     } catch (err) {
-      console.error("Error creating tweet:", err);
-      alert("❌ Failed to create tweet. Please try again.");
+      console.error(err);
+      alert("Failed to create tweet. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch smart suggested times
   const handleSuggestTime = async () => {
     if (!content.trim()) {
-      alert("Enter some content first!");
+      alert("Enter content first!");
       return;
     }
     setSuggestLoading(true);
@@ -111,84 +95,133 @@ const TweetComposer: React.FC<TweetComposerProps> = ({
 
       if (response.data?.suggestedTimes?.length) {
         setSuggestedTimes(response.data.suggestedTimes);
-        // Auto-select the first suggested time
         setScheduledAt(
           new Date(response.data.suggestedTimes[0]).toISOString().slice(0, 16)
         );
       }
     } catch (err) {
-      console.error("Failed to fetch suggested times:", err);
-      alert("Could not fetch suggested times. Using default.");
+      console.error(err);
+      alert("Could not fetch suggested times.");
     } finally {
       setSuggestLoading(false);
     }
   };
 
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMediaFiles(Array.from(e.target.files || []));
+  };
+
   return (
-    <Box borderWidth="1px" borderRadius="md" p={4} bg="gray.50">
-      <VStack gap={3} align="stretch">
-        <Textarea
+    <Paper
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        background: "rgba(17, 24, 39, 0.95)",
+        boxShadow: "0 6px 20px rgba(0, 229, 255, 0.2)",
+        color: "#fff",
+      }}
+    >
+      <Stack spacing={2}>
+        <TextField
+          multiline
+          minRows={3}
           placeholder="What's happening?"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          resize="none"
+          variant="outlined"
+          InputProps={{ style: { color: "#fff" } }}
+          InputLabelProps={{ style: { color: "#00e5ff" } }}
         />
 
-        <HStack gap={2}>
-          <Input
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems="center"
+        >
+          <TextField
             type="datetime-local"
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
-            placeholder="Schedule tweet"
+            variant="standard"
+            InputProps={{ style: { color: "#fff" } }}
+            sx={{ width: { xs: "100%", sm: 200 } }}
           />
-          <Button colorScheme="blue" onClick={handleSubmit} isLoading={loading}>
-            {scheduledAt ? "Schedule" : "Add Tweet"}
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={loading}
+            sx={{
+              color: "#00e5ff",
+              borderColor: "#00e5ff",
+              "&:hover": { background: "rgba(0,229,255,0.1)" },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={20} sx={{ color: "#00e5ff" }} />
+            ) : scheduledAt ? (
+              "Schedule"
+            ) : (
+              "Add Tweet"
+            )}
           </Button>
-          <input
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            onChange={(e) => setMediaFiles(Array.from(e.target.files || []))}
-          />
 
           <Button
-            colorScheme="teal"
-            size="sm"
-            onClick={handleSuggestTime}
-            isLoading={suggestLoading}
+            variant="outlined"
+            color="success"
+            component="label"
+            sx={{ color: "#00ff99", borderColor: "#00ff99" }}
           >
-            Suggest Best Time
+            Upload Media
+            <input
+              type="file"
+              hidden
+              multiple
+              accept="image/*,video/*"
+              onChange={handleMediaChange}
+            />
           </Button>
-        </HStack>
 
-        {/* Dropdown for all suggested times */}
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleSuggestTime}
+            disabled={suggestLoading}
+            sx={{ color: "#ff6b6b", borderColor: "#ff6b6b" }}
+          >
+            {suggestLoading ? (
+              <CircularProgress size={20} sx={{ color: "#ff6b6b" }} />
+            ) : (
+              "Suggest Time"
+            )}
+          </Button>
+        </Stack>
+
         {suggestedTimes.length > 1 && (
-          <VStack align="stretch" gap={2}>
-            <Text fontSize="sm" color="gray.600">
-              Pick a suggested posting time:
-            </Text>
-            <select
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-              style={{
-                padding: "8px",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-              }}
-            >
-              {suggestedTimes.map((time, idx) => (
-                <option
-                  key={idx}
-                  value={new Date(time).toISOString().slice(0, 16)}
-                >
-                  {new Date(time).toLocaleString()}
-                </option>
-              ))}
-            </select>
-          </VStack>
+          <TextField
+            select
+            label="Pick suggested time"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            variant="standard"
+            InputProps={{ style: { color: "#fff" } }}
+            InputLabelProps={{ style: { color: "#00e5ff" } }}
+            sx={{
+              width: { xs: "100%", sm: "20%" }, 
+            }}
+          >
+            {suggestedTimes.map((time, idx) => (
+              <MenuItem
+                key={idx}
+                value={new Date(time).toISOString().slice(0, 16)}
+              >
+                {new Date(time).toLocaleString()}
+              </MenuItem>
+            ))}
+          </TextField>
         )}
-      </VStack>
-    </Box>
+      </Stack>
+    </Paper>
   );
 };
 

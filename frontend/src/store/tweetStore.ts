@@ -1,21 +1,20 @@
 import { create } from "zustand";
-import * as tweetService from "../services/tweetService"; // Backend API service
+import * as tweetService from "../services/tweetService"; 
 
-// Backend Tweet type with _id from MongoDB
-interface MongoTweet {
-  _id: string;
-  content: string;
-  scheduledAt?: string;
-  status: "draft" | "scheduled" | "posted";
-  engagement?: {
-    likes: number;
-    retweets: number;
-    comments: number;
-  };
-}
+// interface MongoTweet {
+//   _id: string;
+//   content: string;
+//   scheduledAt?: string;
+//   status: "draft" | "scheduled" | "posted";
+//   engagement?: {
+//     likes: number;
+//     retweets: number;
+//     comments: number;
+//   };
+// }
 
 export interface Tweet {
-  id: string; // frontend-friendly id
+  id: string; 
   content: string;
   scheduledAt?: string;
   status: "draft" | "scheduled" | "posted";
@@ -71,11 +70,10 @@ export const useTweetStore = create<TweetState>((set, get) => ({
 
   fetchAllTweets: async (userId) => {
     try {
-      // Let TS treat fetched data as any[], then map _id -> id
       const rawTweets = await tweetService.fetchTweets(userId);
 
       const mappedTweets: Tweet[] = rawTweets.map((t: any) => ({
-        id: t._id, // map MongoDB _id to frontend-friendly id
+        id: t._id,
         content: t.content,
         scheduledAt: t.scheduledAt,
         status: t.status,
@@ -92,7 +90,6 @@ export const useTweetStore = create<TweetState>((set, get) => ({
   createTweet: async (payload) => {
     try {
       const newTweet = await tweetService.createTweet(payload);
-      // Map _id → id when adding
       get().addTweet({ ...newTweet, id: (newTweet as any)._id });
     } catch (err) {
       console.error("Failed to create tweet:", err);

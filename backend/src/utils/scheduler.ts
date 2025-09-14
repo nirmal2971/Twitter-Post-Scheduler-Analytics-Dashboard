@@ -3,9 +3,7 @@ import { markTweetAsPosted, getScheduledTweets } from "../services/tweet.service
 import { ITweet } from "../models/tweet.model";
 import { Types } from "mongoose";
 
-/**
- * Schedule a single tweet to be posted at its scheduled time
- */
+
 export const scheduleTweet = (tweetId: string, scheduledAt: Date) => {
   const now = new Date();
   const delay = scheduledAt.getTime() - now.getTime();
@@ -18,7 +16,6 @@ export const scheduleTweet = (tweetId: string, scheduledAt: Date) => {
     return;
   }
 
-  // Convert scheduled date to cron format: "sec min hour day month *"
   const taskDate = new Date(scheduledAt);
   const cronExpression = `${taskDate.getSeconds()} ${taskDate.getMinutes()} ${taskDate.getHours()} ${taskDate.getDate()} ${taskDate.getMonth() + 1} *`;
 
@@ -35,9 +32,7 @@ export const scheduleTweet = (tweetId: string, scheduledAt: Date) => {
   console.log(`Tweet ${tweetId} scheduled at ${scheduledAt}`);
 };
 
-/**
- * Initialize all pending tweets on server start
- */
+
 export const initializeScheduledTweets = async () => {
   try {
     const scheduledTweets: ITweet[] = await getScheduledTweets();

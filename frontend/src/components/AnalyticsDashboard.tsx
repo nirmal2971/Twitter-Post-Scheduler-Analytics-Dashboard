@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Box, VStack, Text, HStack, Badge, Spinner } from "@chakra-ui/react";
+import { Box, Typography, Paper, Stack, CircularProgress } from "@mui/material";
 import { useTweetStore } from "../store/tweetStore";
 import type { Tweet } from "../store/tweetStore";
 import { jwtDecode } from "jwt-decode";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 interface AnalyticsTweet extends Tweet {
   likes?: number;
@@ -11,10 +19,12 @@ interface AnalyticsTweet extends Tweet {
 }
 
 interface DecodedToken {
-  id: string; // adjust if your backend uses `_id` or `userId`
+  id: string;
   email: string;
   exp: number;
 }
+
+const COLORS = ["#00e5ff", "#ffb74d", "#ff6b6b"];
 
 const AnalyticsDashboard: React.FC = () => {
   const fetchAllTweets = useTweetStore((state) => state.fetchAllTweets);
@@ -25,25 +35,14 @@ const AnalyticsDashboard: React.FC = () => {
     const loadTweets = async () => {
       setLoading(true);
       try {
-        // 🔑 Get token from localStorage
         const token = localStorage.getItem("token");
-        if (!token) {
-          console.error("No token found, user not logged in");
-          return;
-        }
+        if (!token) return;
 
-        // Decode the token
         const decoded: DecodedToken = jwtDecode(token);
-        console.log("Decoded ID:", decoded.id);
-
-
-        // Use the user ID from the token
         await fetchAllTweets(decoded.id);
 
-        // Get tweets from store
         const allTweets = useTweetStore.getState().tweets;
 
-        // Add dummy engagement metrics
         const analyticsTweets: AnalyticsTweet[] = allTweets.map((t) => ({
           ...t,
           likes: Math.floor(Math.random() * 50),
@@ -69,49 +68,70 @@ const AnalyticsDashboard: React.FC = () => {
     return "Underperforming";
   };
 
-  const getBadgeColor = (priority: string) => {
-    switch (priority) {
-      case "Viral": return "green";
-      case "Performing": return "yellow";
-      case "Underperforming": return "red";
-      default: return "gray";
-    }
-  };
-
   return (
-    <Box p={4}>
-      <Text fontSize="xl" fontWeight="bold" mb={4}>
+    <Box>
+      <Typography
+        variant="h5"
+        sx={{ color: "#00e5ff", fontWeight: "bold", mb: 3 }}
+      >
         Tweet Analytics
-      </Text>
+      </Typography>
 
       {loading ? (
-        <Spinner />
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress sx={{ color: "#00e5ff" }} />
+        </Box>
       ) : tweets.length === 0 ? (
-        <Text>No tweets to show</Text>
+        <Typography color="#ccc">No tweets to show</Typography>
       ) : (
-        <VStack align="stretch" gap={3}>
+        <Stack spacing={3}>
           {tweets.map((tweet) => {
             const priority = getPriority(tweet);
+            const data = [
+              { name: "Likes", value: tweet.likes || 0 },
+              { name: "Retweets", value: tweet.retweets || 0 },
+              { name: "Replies", value: tweet.replies || 0 },
+            ];
+
             return (
-              <Box
+              <Paper
                 key={tweet.id}
-                borderWidth="1px"
-                borderRadius="md"
-                p={3}
-                bg="gray.50"
-                shadow="sm"
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  background: "rgba(17, 24, 39, 0.95)",
+                  boxShadow: "0 6px 20px rgba(0, 229, 255, 0.2)",
+                  color: "#fff",
+                }}
               >
-                <Text mb={2}>{tweet.content}</Text>
-                <HStack gap={3}>
-                  <Badge colorScheme={getBadgeColor(priority)}>{priority}</Badge>
-                  <Text fontSize="sm" color="gray.600">
-                    Likes: {tweet.likes} | Retweets: {tweet.retweets} | Replies: {tweet.replies}
-                  </Text>
-                </HStack>
-              </Box>
+                <Typography sx={{ mb: 2 }}>{tweet.content}</Typography>
+                <Typography sx={{ mb: 1, color: "#ccc" }}>Priority: {priority}</Typography>
+
+                <Box sx={{ width: "100%", height: 200 }}>
+                  <ResponsiveContainer>
+                    <PieChart>
+                      <Pie
+                        data={data}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={70}
+                        label
+                      >
+                        {data.map((_, index) => (
+                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </Box>
+              </Paper>
             );
           })}
-        </VStack>
+        </Stack>
       )}
     </Box>
   );

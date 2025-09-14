@@ -11,7 +11,6 @@ import { upload } from "../middlewares/upload.middleware";
 
 const router = express.Router();
 
-// Correct routes
 router.post("/", authMiddleware, upload.array("media"), createNewTweet);
 router.get("/", authMiddleware, getUserTweets);
 router.put("/:id", authMiddleware, updateExistingTweet);

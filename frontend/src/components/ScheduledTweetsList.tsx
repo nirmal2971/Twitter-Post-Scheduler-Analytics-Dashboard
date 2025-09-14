@@ -1,34 +1,30 @@
 import React, { useEffect } from "react";
 import { useTweetStore, type Tweet } from "../store/tweetStore";
-import { Box, Text, VStack, HStack } from "@chakra-ui/react";
-import { IconButton } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import api from "../api"; // ✅ use central api with JWT
+import api from "../api";
 
 const ScheduledTweetsList: React.FC = () => {
   const tweets = useTweetStore((state) => state.tweets);
   const addTweet = useTweetStore((state) => state.addTweet);
   const deleteTweet = useTweetStore((state) => state.deleteTweet);
-  const token = localStorage.getItem("token"); // <-- JWT token
+  const token = localStorage.getItem("token");
 
-  // Fetch scheduled tweets from backend on mount
   useEffect(() => {
     const fetchTweets = async () => {
       try {
-        const response = await api.get(
-          `${import.meta.env.VITE_API_BASE}/tweets`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.get(`${import.meta.env.VITE_API_BASE}/tweets`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         const backendTweets: Tweet[] = response.data.map((t: any) => ({
           id: t._id,
           content: t.content,
           scheduledAt: t.scheduledAt,
           status: t.status,
         }));
+
         backendTweets.forEach((t) => addTweet(t));
       } catch (err) {
         console.error("Failed to fetch tweets:", err);
@@ -39,48 +35,59 @@ const ScheduledTweetsList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/tweets/${id}`); // <-- remove VITE_API_BASE
-      deleteTweet(id); // update local state
+      await api.delete(`${import.meta.env.VITE_API_BASE}/tweets/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      deleteTweet(id);
     } catch (err) {
       console.error("Failed to delete tweet:", err);
     }
   };
 
   if (tweets.length === 0) {
-    return <Text>No scheduled tweets yet. Compose one!</Text>;
+    return (
+      <Typography color="#ccc">No scheduled tweets yet. Compose one!</Typography>
+    );
   }
 
   return (
-    <VStack gap={3} align="stretch">
+    <Stack spacing={2}>
       {tweets.map((tweet) => (
         <Box
           key={tweet.id}
-          borderWidth="1px"
-          borderRadius="md"
-          p={3}
-          bg={tweet.status === "scheduled" ? "blue.50" : "gray.50"}
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            background: tweet.status === "scheduled"
+              ? "rgba(0, 229, 255, 0.05)"
+              : "rgba(55, 65, 81, 0.8)",
+            boxShadow: "0 4px 12px rgba(0, 229, 255, 0.2)",
+          }}
         >
-          <HStack justifyContent="space-between" alignItems="flex-start">
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-              <Text>{tweet.content}</Text>
+              <Typography sx={{ color: "#fff", mb: 1 }}>{tweet.content}</Typography>
               {tweet.scheduledAt && (
-                <Text fontSize="sm" color="gray.500">
+                <Typography fontSize="0.85rem" color="#00e5ff">
                   Scheduled at: {new Date(tweet.scheduledAt).toLocaleString()}
-                </Text>
+                </Typography>
               )}
             </Box>
             <IconButton
               aria-label="Delete tweet"
-              color="error"
-              size="small"
               onClick={() => handleDelete(tweet.id)}
+              sx={{
+                color: "#ff6b6b",
+                "&:hover": { background: "rgba(255, 107, 107, 0.1)" },
+              }}
+              size="small"
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
-          </HStack>
+          </Stack>
         </Box>
       ))}
-    </VStack>
+    </Stack>
   );
 };
 

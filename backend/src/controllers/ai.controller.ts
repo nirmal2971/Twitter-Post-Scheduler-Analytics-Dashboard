@@ -1,14 +1,17 @@
-// src/controllers/ai.controller.ts
 import { Request, Response } from "express";
-import { generateTweetsAndHashtags,generateOptimalTimes } from "../utils/openaiClient";
+import {
+  generateTweetsAndHashtags,
+  generateOptimalTimes,
+} from "../utils/openaiClient";
 
-/** Existing endpoint */
 export async function getTweetSuggestions(req: Request, res: Response) {
   try {
     const topic = req.query.topic as string;
 
     if (!topic) {
-      return res.status(400).json({ success: false, error: "Topic is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Topic is required" });
     }
 
     const content = await generateTweetsAndHashtags(topic);
@@ -18,13 +21,14 @@ export async function getTweetSuggestions(req: Request, res: Response) {
   }
 }
 
-/** New endpoint for Smart Scheduling */
 export async function getSuggestedTime(req: Request, res: Response) {
   try {
     const topic = req.query.topic as string;
 
     if (!topic) {
-      return res.status(400).json({ success: false, error: "Topic is required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Topic is required" });
     }
 
     const suggestedTimes = await generateOptimalTimes(topic);

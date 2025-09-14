@@ -1,6 +1,4 @@
-import api from "../api"; // adjust path to match your project structure
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import api from "../api";
 
 export interface TweetPayload {
   content: string;

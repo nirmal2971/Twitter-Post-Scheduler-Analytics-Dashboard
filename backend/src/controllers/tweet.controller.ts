@@ -7,7 +7,7 @@ import {
   markTweetAsPosted,
 } from "../services/tweet.service";
 import { Types } from "mongoose";
-import { AuthRequest } from "../middlewares/auth.middlewares"; // <- Use your typed request
+import { AuthRequest } from "../middlewares/auth.middlewares"; 
 
 // Create a new tweet
 export const createNewTweet = async (req: AuthRequest, res: Response) => {
@@ -46,7 +46,7 @@ export const createNewTweet = async (req: AuthRequest, res: Response) => {
 // Get all tweets for the logged-in user
 export const getUserTweets = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = new Types.ObjectId(req.user.id); // ✅ use token id
+    const userId = new Types.ObjectId(req.user.id); 
     const tweets = await getTweetsByUser(userId);
     res.json(tweets);
   } catch (err: any) {
@@ -54,7 +54,7 @@ export const getUserTweets = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Update a tweet (make sure only owner can update)
+// Update a tweet 
 export const updateExistingTweet = async (req: AuthRequest, res: Response) => {
   try {
     const tweetId = req.params.id;
@@ -85,7 +85,6 @@ export const deleteExistingTweet = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Mark tweet as posted
 export const postTweet = async (req: AuthRequest, res: Response) => {
   try {
     const tweetId = req.params.id;

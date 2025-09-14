@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import {
   Box,
-  VStack,
-  Text,
+  Paper,
+  Stack,
+  Typography,
   Button,
-  Input,
-  HStack,
-} from "@chakra-ui/react";
-import { CircularProgress } from "@mui/material"; // MUI loader
-import api from "../api";   // ✅ use central api with JWT
+  TextField,
+  CircularProgress,
+} from "@mui/material";
+import api from "../api";
 
 interface Suggestion {
   id: string;
@@ -20,9 +20,7 @@ interface ContentSuggestionsProps {
   onSelectSuggestion: (text: string) => void;
 }
 
-const ContentSuggestions: React.FC<ContentSuggestionsProps> = ({
-  onSelectSuggestion,
-}) => {
+const ContentSuggestions: React.FC<ContentSuggestionsProps> = ({ onSelectSuggestion }) => {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -32,7 +30,6 @@ const ContentSuggestions: React.FC<ContentSuggestionsProps> = ({
       alert("Enter a topic first!");
       return;
     }
-
     setLoading(true);
     try {
       const response = await api.get(
@@ -43,29 +40,19 @@ const ContentSuggestions: React.FC<ContentSuggestionsProps> = ({
         throw new Error(response.data.error || "Unknown error");
       }
 
-      // Parse Gemini text response into structured suggestions
-      const lines = response.data.content
-        .split("\n")
-        .filter((l: string) => l.trim());
+      const lines = response.data.content.split("\n").filter((l: string) => l.trim());
       const parsed: Suggestion[] = [];
       let current: Partial<Suggestion> = {};
 
       lines.forEach((line: string) => {
         if (line.toLowerCase().startsWith("tweet")) {
-          if (current.content) {
-            parsed.push({ id: String(parsed.length), ...current } as Suggestion);
-          }
+          if (current.content) parsed.push({ id: String(parsed.length), ...current } as Suggestion);
           current = { content: line.replace(/Tweet\s*\d*:\s*/i, "").trim() };
         } else if (line.toLowerCase().startsWith("hashtags")) {
-          current.hashtags = line
-            .replace(/Hashtags:\s*/i, "")
-            .split(/\s+/)
-            .filter(Boolean);
+          current.hashtags = line.replace(/Hashtags:\s*/i, "").split(/\s+/).filter(Boolean);
         }
       });
-      if (current.content) {
-        parsed.push({ id: String(parsed.length), ...current } as Suggestion);
-      }
+      if (current.content) parsed.push({ id: String(parsed.length), ...current } as Suggestion);
 
       setSuggestions(parsed);
     } catch (err) {
@@ -76,68 +63,117 @@ const ContentSuggestions: React.FC<ContentSuggestionsProps> = ({
     }
   };
 
+  const handleReset = () => {
+    setTopic("");
+    setSuggestions([]);
+  };
+
+  const handleInsert = (text: string) => {
+    onSelectSuggestion(text);
+    handleReset();
+  };
+
   return (
-    <Box borderWidth="1px" borderRadius="md" p={4} bg="gray.50">
-      <VStack align="stretch" gap={3}>
-        {/* Topic Input */}
-        <HStack>
-          <Input
-            placeholder="Enter a topic (e.g. AI, sports, startups)"
+    <Paper
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        background: "rgba(17, 24, 39, 0.95)",
+        boxShadow: "0 6px 20px rgba(0, 229, 255, 0.2)",
+      }}
+    >
+      <Stack spacing={2}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+          <TextField
+            fullWidth
+            variant="standard"
+            label="Enter a topic"
+            InputLabelProps={{ style: { color: "#00e5ff" } }}
+            InputProps={{ style: { color: "#fff" } }}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
           />
           <Button
-            size="sm"
-            colorScheme="blue"
+            variant="outlined"
+            color="primary"
             onClick={fetchSuggestions}
             disabled={loading}
+            sx={{
+              color: "#00e5ff",
+              borderColor: "#00e5ff",
+              "&:hover": { background: "rgba(0, 229, 255, 0.1)" },
+            }}
           >
-            {loading ? <CircularProgress size={20} /> : "Generate"}
+            {loading ? <CircularProgress size={20} sx={{ color: "#00e5ff" }} /> : "Generate"}
           </Button>
-        </HStack>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleReset}
+            sx={{
+              color: "#ff6b6b",
+              borderColor: "#ff6b6b",
+              "&:hover": { background: "rgba(255, 107, 107, 0.1)" },
+            }}
+          >
+            Reset
+          </Button>
+        </Stack>
 
-        {/* Suggestions */}
         {loading ? (
           <Box display="flex" justifyContent="center" py={4}>
-            <CircularProgress />
+            <CircularProgress sx={{ color: "#00e5ff" }} />
           </Box>
         ) : suggestions.length === 0 ? (
-          <Text color="gray.500">No suggestions yet. Enter a topic!</Text>
+          <Typography color="#ccc">No suggestions yet. Enter a topic!</Typography>
         ) : (
-          <VStack gap={3} align="stretch">
+          <Stack spacing={2}>
             {suggestions.map((s) => (
-              <Box
+              <Paper
                 key={s.id}
-                p={3}
-                borderWidth="1px"
-                borderRadius="md"
-                bg="white"
-                shadow="sm"
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  background: "rgba(25, 32, 43, 0.95)",
+                  boxShadow: "0 4px 15px rgba(0, 229, 255, 0.2)",
+                }}
               >
-                <Text mb={2}>{s.content}</Text>
+                <Typography sx={{ mb: 1, color: "#fff" }}>{s.content}</Typography>
                 {s.hashtags && s.hashtags.length > 0 && (
-                  <Text fontSize="sm" color="blue.500">
-                    {s.hashtags.join(" ")}
-                  </Text>
+                  <Stack direction="row" spacing={1} mb={1}>
+                    {s.hashtags.map((tag, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          color: "#00e5ff",
+                          borderColor: "#00e5ff",
+                          textTransform: "none",
+                        }}
+                      >
+                        #{tag}
+                      </Button>
+                    ))}
+                  </Stack>
                 )}
                 <Button
-                  size="xs"
-                  mt={2}
-                  colorScheme="green"
+                  size="small"
+                  variant="contained"
+                  color="success"
                   onClick={() =>
-                    onSelectSuggestion(
-                      `${s.content} ${s.hashtags?.join(" ") || ""}`.trim()
-                    )
+                    handleInsert(`${s.content} ${s.hashtags?.map((h) => `#${h}`).join(" ") || ""}`.trim())
                   }
+                  sx={{ textTransform: "none" }}
                 >
                   Insert
                 </Button>
-              </Box>
+              </Paper>
             ))}
-          </VStack>
+          </Stack>
         )}
-      </VStack>
-    </Box>
+      </Stack>
+    </Paper>
   );
 };
 

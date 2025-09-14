@@ -1,4 +1,3 @@
-// src/utils/geminiClient.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -30,7 +29,6 @@ export async function generateOptimalTimes(topic: string): Promise<string[]> {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
-    // Parse Gemini response into array of ISO strings
     const times = text
       .split(/,|\n/)
       .map((t) => t.trim())
