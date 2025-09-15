@@ -15,8 +15,8 @@ const __dirname = path.dirname(__filename);
 // Serve static files from Vite build
 app.use(express.static(path.join(__dirname, "dist")));
 
-// SPA fallback
-app.get("*", (req, res) => {
+// SPA fallback for React Router
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
