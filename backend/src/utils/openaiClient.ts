@@ -21,24 +21,36 @@ export async function generateTweetsAndHashtags(topic: string) {
 export async function generateOptimalTimes(topic: string): Promise<string[]> {
   try {
     const prompt = `
-      Suggest 3 optimal posting times (ISO 8601 format) for the topic "${topic}".
-      Consider engagement trends and time zones.
-      Return only the ISO date-times separated by commas.
+      Suggest 3 optimal posting times for the topic "${topic}" in the future, starting from now.
+      Provide the times in HH:MM (24h) format only, considering engagement trends and time zones.
+      Do not include past dates; only give times of day (e.g., 14:00, 18:30, 21:00).
+      Return them separated by commas.
     `;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
 
+    const now = new Date();
     const times = text
       .split(/,|\n/)
       .map((t) => t.trim())
       .filter(Boolean)
-      .map((t) => new Date(t).toISOString());
+      .map((t) => {
+        // parse hours and minutes from AI
+        const [hours, minutes] = t.split(":").map(Number);
+        const dt = new Date(now); // today
+        dt.setUTCHours(hours, minutes, 0, 0);
+
+        // if time already passed today, schedule for tomorrow
+        if (dt <= now) dt.setUTCDate(dt.getUTCDate() + 1);
+
+        return dt.toISOString();
+      });
 
     return times;
   } catch (error) {
     console.error("Gemini AI error for suggested times:", error);
-    // fallback dummy times
+    // fallback: next 3 hours
     const now = new Date();
     return [
       new Date(now.getTime() + 1 * 60 * 60 * 1000).toISOString(),

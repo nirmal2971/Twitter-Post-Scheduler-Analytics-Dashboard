@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Grid,
   Typography,
   Button,
   Paper,
@@ -11,6 +10,8 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+// import { Grid } from "@mui/material"; // this works but in some TS setups triggers overload issues
+
 import { useNavigate } from "react-router-dom";
 import TweetComposer from "../components/TweetComposer";
 import ScheduledTweetsList from "../components/ScheduledTweetsList";
@@ -21,6 +22,12 @@ const Dashboard: React.FC = () => {
   const [content, setContent] = useState("");
   const [showAnalytics, setShowAnalytics] = useState(false);
   const navigate = useNavigate();
+  const paperStyle = {
+    p: 3,
+    borderRadius: 3,
+    background: "rgba(17, 24, 39, 0.95)",
+    boxShadow: "0 8px 25px rgba(0, 229, 255, 0.2)",
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -74,46 +81,38 @@ const Dashboard: React.FC = () => {
         </Stack>
       </Box>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={7}>
+      <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+        {/* Left column */}
+        <Box sx={{ flex: "1 1 60%" }}>
           <Stack spacing={4}>
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                background: "rgba(17, 24, 39, 0.95)",
-                boxShadow: "0 8px 25px rgba(0, 229, 255, 0.2)",
-              }}
-            >
+            <Paper sx={paperStyle}>
               <TweetComposer content={content} setContent={setContent} />
             </Paper>
 
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                background: "rgba(17, 24, 39, 0.95)",
-                boxShadow: "0 8px 25px rgba(0, 229, 255, 0.2)",
-              }}
-            >
-              <ContentSuggestions onSelectSuggestion={(text) => setContent(text)} />
+            <Paper sx={paperStyle}>
+              <ContentSuggestions
+                onSelectSuggestion={(text) => setContent(text)}
+              />
             </Paper>
 
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                background: "rgba(17, 24, 39, 0.95)",
-                boxShadow: "0 8px 25px rgba(0, 229, 255, 0.2)",
-              }}
-            >
+            <Paper sx={paperStyle}>
               <ScheduledTweetsList />
             </Paper>
           </Stack>
-        </Grid>
-      </Grid>
+        </Box>
 
-      <Dialog open={showAnalytics} onClose={() => setShowAnalytics(false)} maxWidth="sm" fullWidth>
+        {/* Right column (optional) */}
+        <Box sx={{ flex: "1 1 35%" }}>
+          {/* Add additional content if needed */}
+        </Box>
+      </Box>
+
+      <Dialog
+        open={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Tweet Analytics</DialogTitle>
         <DialogContent dividers>
           <AnalyticsDashboard />

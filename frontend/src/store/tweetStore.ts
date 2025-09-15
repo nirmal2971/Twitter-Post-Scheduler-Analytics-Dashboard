@@ -44,13 +44,16 @@ interface TweetState {
 export const useTweetStore = create<TweetState>((set, get) => ({
   tweets: [],
 
-  addTweet: (tweet) =>
-    set((state) => ({
-      tweets: [
-        ...state.tweets,
-        { ...tweet, priority: get().computePriority(tweet) },
-      ],
-    })),
+addTweet: (tweet) =>
+  set((state) => ({
+    tweets: state.tweets.some(t => t.id === tweet.id)
+      ? state.tweets // skip duplicate
+      : [
+          ...state.tweets,
+          { ...tweet, priority: get().computePriority(tweet) },
+        ],
+  })),
+
 
   updateTweet: (id, updated) =>
     set((state) => ({
