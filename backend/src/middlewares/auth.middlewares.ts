@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export interface AuthRequest extends Request {
   user?: any;
-  files?: Express.Multer.File[]; 
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] }; 
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
