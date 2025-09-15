@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-     "start": "node server.js"
+    "build": "vite build",
+    "start": "vite preview --port $PORT --host 0.0.0.0"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.26.0",
