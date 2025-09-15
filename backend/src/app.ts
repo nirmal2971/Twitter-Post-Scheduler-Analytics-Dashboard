@@ -12,7 +12,7 @@ import aiRoutes from "./routes/ai.routes";
 import { initializeScheduledTweets } from "./utils/scheduler";
 import path from "path";
 
-import "./auth/passport";
+// import "./auth/passport";
 
 const app = express();
 
