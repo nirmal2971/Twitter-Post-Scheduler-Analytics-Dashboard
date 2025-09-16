@@ -16,19 +16,26 @@ import path from "path";
 
 const app = express();
 
-// ✅ CORS config
+const allowedOrigins = [
+  "https://twitter-post-scheduler-analytics-da.vercel.app",
+  "http://localhost:5173",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://twitter-post-scheduler-analytics-da.vercel.app",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    optionsSuccessStatus: 200, // 👈 ensures OPTIONS responds OK
   })
 );
-
-// ✅ Ensure OPTIONS preflights always succeed
-// app.options("*", cors());
-
 // Middleware
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
