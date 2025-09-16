@@ -16,14 +16,20 @@ import path from "path";
 
 const app = express();
 
-// Middleware
+// ✅ CORS config
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://twitter-post-scheduler-analytics-dashboard-production.up.railway.app",
+    origin: process.env.FRONTEND_URL || "https://twitter-post-scheduler-analytics-da.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
+// ✅ Ensure OPTIONS preflights always succeed
+app.options("*", cors());
+
+// Middleware
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
